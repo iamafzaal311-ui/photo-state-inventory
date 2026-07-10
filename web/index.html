@@ -1,38 +1,99 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="inventory_man">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicons.png"/>
+  <link rel="icon" type="image/png" href="favicons.png" />
 
   <title>inventory_man</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    #loading-indicator {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      z-index: 99999;
+      transition: opacity 0.5s ease;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #2196F3;
+      /* Flutter Blue Color */
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333333;
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <div id="loading-indicator">
+    <div class="spinner"></div>
+    <p class="loading-text">POS System Load Ho Raha Hai...</p>
+  </div>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.addedNodes) {
+          for (let i = 0; i < mutation.addedNodes.length; i++) {
+            let node = mutation.addedNodes[i];
+            // Detects when Flutter injects its main view element
+            if (node.tagName === 'FLUTTER-VIEW' || node.tagName === 'FLT-GLASS-PANE') {
+              const loader = document.getElementById('loading-indicator');
+              if (loader) {
+                loader.style.opacity = '0'; // Smooth fade out effect
+                setTimeout(() => loader.remove(), 500);
+              }
+              observer.disconnect();
+              break;
+            }
+          }
+        }
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  </script>
 </body>
+
 </html>
