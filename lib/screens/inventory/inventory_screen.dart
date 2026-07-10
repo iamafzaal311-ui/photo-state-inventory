@@ -667,8 +667,10 @@ class _ProductDialogState extends State<_ProductDialog> {
   );
   late String _category = widget.product?.category ?? 'Copying';
   late String _unit = widget.product?.unit ?? 'pages';
-  late List<String> _sampleImages = widget.product?.sampleImages.toList() ?? [];
-  late List<String> _customFields = widget.product?.customFields.toList() ?? [];
+  late final List<String> _sampleImages =
+      widget.product?.sampleImages.toList() ?? [];
+  late final List<String> _customFields =
+      widget.product?.customFields.toList() ?? [];
   final TextEditingController _newFieldCtrl = TextEditingController();
 
   final _categories = [
