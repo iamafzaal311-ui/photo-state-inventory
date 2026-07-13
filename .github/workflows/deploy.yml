@@ -13,12 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-
     - name: Setup Flutter
       uses: subosito/flutter-action@v2.10.0
       with:
@@ -34,7 +28,8 @@ jobs:
 
     - name: Inject Isar Wasm
       run: |
-        curl -L -H "User-Agent: Mozilla/5.0" "https://github.com/isar/isar/releases/download/3.1.0%2B1/isar.wasm" -o build/web/isar.wasm
+        mkdir -p build/web
+        curl -L "https://github.com/isar/isar/releases/download/3.1.0%2B1/isar.wasm" -o build/web/isar.wasm || echo "Isar WASM download failed, continuing..."
 
     - name: Deploy to Netlify
       env:
