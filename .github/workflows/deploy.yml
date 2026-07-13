@@ -13,7 +13,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Java (Required for stable building)
+    - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
@@ -22,14 +22,12 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2.16.0
       with:
-        flutter-version: '3.22.2' # Aik solid aur secure stable version jo dependency mismatch nahi karega
+        flutter-version: '3.22.2'
         channel: 'stable'
         cache: true
 
     - name: Install Dependencies
-      run: |
-        flutter pub upgrade --major-versions
-        flutter pub get
+      run: flutter pub get
 
     - name: Build Flutter Web
       run: flutter build web --release
@@ -37,12 +35,15 @@ jobs:
     - name: Inject Isar Wasm
       run: |
         mkdir -p build/web
-        curl -L "https://github.com/isar/isar/releases/download/3.1.0%2B1/isar.wasm" -o build/web/isar.wasm || echo "Isar WASM download failed, continuing..."
+        curl -L "https://github.com/isar/isar/releases/download/3.1.0%2B1/isar.wasm" -o build/web/isar.wasm || echo "Isar WASM download failed"
 
     - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v3.0
+      with:
+        publish-dir: './build/web'
+        production-deploy: true
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        enable-commit-comment: false
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      run: |
-        npm install -g netlify-cli
-        netlify deploy --dir=build/web --prod --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
