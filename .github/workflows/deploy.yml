@@ -13,15 +13,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2.10.0
+    - name: Setup Java (Required for stable building)
+      uses: actions/setup-java@v4
       with:
-        flutter-version: 'any'
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2.16.0
+      with:
+        flutter-version: '3.22.2' # Aik solid aur secure stable version jo dependency mismatch nahi karega
         channel: 'stable'
         cache: true
 
     - name: Install Dependencies
-      run: flutter pub get
+      run: |
+        flutter pub upgrade --major-versions
+        flutter pub get
 
     - name: Build Flutter Web
       run: flutter build web --release
@@ -37,4 +45,4 @@ jobs:
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
       run: |
         npm install -g netlify-cli
-        netlify deploy --dir=build/web --prod
+        netlify deploy --dir=build/web --prod --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
