@@ -227,12 +227,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           borderRadius: BorderRadius.circular(10),
                                           border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                                         ),
-                                        child: Row(
+                                        child: Wrap(
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          spacing: 8,
+                                          runSpacing: 6,
                                           children: [
                                             const Icon(Icons.admin_panel_settings, color: AppColors.primaryLight, size: 20),
-                                            const SizedBox(width: 12),
                                             const Text('Username:', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-                                            const SizedBox(width: 8),
                                             const Text('admin', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 16)),
                                           ],
                                         ),
