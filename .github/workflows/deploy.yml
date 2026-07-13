@@ -33,7 +33,7 @@ jobs:
 
     - name: Inject Isar Wasm
       run: |
-        curl -L -H "User-Agent: Mozilla/5.0" "https://github.com/isar/isar/releases/download/3.1.0%2B7/isar.wasm" -o build/web/isar.wasm
+        curl -L -H "User-Agent: Mozilla/5.0" "https://github.com/isar/isar/releases/download/3.1.0%2B1/isar.wasm" -o build/web/isar.wasm
 
     - name: Deploy to Netlify
       env:
