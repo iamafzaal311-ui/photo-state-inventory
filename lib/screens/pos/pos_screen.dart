@@ -20,7 +20,6 @@ class PosScreen extends ConsumerStatefulWidget {
 class _PosScreenState extends ConsumerState<PosScreen> {
   String _searchProduct = '';
   String _selectedCategory = 'All';
-  SaleModel? _lastSale;
 
   @override
   Widget build(BuildContext context) {
@@ -37,142 +36,402 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Row(
-        children: [
-          // Products panel (left)
-          Expanded(
-            flex: 6,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Point of Sale', style: Theme.of(context).textTheme.headlineLarge)
-                      .animate().fadeIn().slideY(begin: -0.1),
-                  const SizedBox(height: 20),
-                  // Search & category filter
-                  Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalWidth = constraints.maxWidth;
+          // Cart takes 300-360px, product area gets the rest
+          final cartWidth = (totalWidth * 0.30).clamp(280.0, 360.0);
+
+          return Row(
+            children: [
+              // Products panel (left)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 3,
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            hintText: 'Search products...',
-                            prefixIcon: Center(widthFactor: 1, heightFactor: 1, child: Text('🔍', style: TextStyle(fontSize: 16))),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          ),
-                          onChanged: (v) => setState(() => _searchProduct = v),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 4,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: categories.take(8).map((c) => Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: _CategoryChip(
-                                label: c,
-                                selected: _selectedCategory == c,
-                                onTap: () => setState(() => _selectedCategory = c),
+                      // Header
+                      Text(
+                        'Point of Sale',
+                        style: Theme.of(context).textTheme.headlineLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ).animate().fadeIn().slideY(begin: -0.1),
+                      const SizedBox(height: 16),
+                      // Search & category filter
+                      Row(
+                        children: [
+                          Flexible(
+                            flex: 3,
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                hintText: 'Search products...',
+                                prefixIcon: Icon(Icons.search, size: 18),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               ),
-                            )).toList(),
+                              onChanged: (v) => setState(() => _searchProduct = v),
+                            ),
                           ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            flex: 4,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: categories.map((c) => Padding(
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: _CategoryChip(
+                                    label: c,
+                                    selected: _selectedCategory == c,
+                                    onTap: () => setState(() => _selectedCategory = c),
+                                  ),
+                                )).toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ).animate().fadeIn(delay: 100.ms),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: GridView.builder(
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: (totalWidth - cartWidth) / 2 > 180 ? 200 : 160,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 1.05,
+                          ),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) => _ProductCard(
+                            product: filtered[index],
+                            onAdd: (p) => _handleAddProduct(p),
+                          ).animate().fadeIn(delay: Duration(milliseconds: 30 * index)),
                         ),
                       ),
                     ],
-                  ).animate().fadeIn(delay: 100.ms),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 200,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) => _ProductCard(
-                        product: filtered[index],
-                        onAdd: (p) => _handleAddProduct(p),
-                      ).animate().fadeIn(delay: Duration(milliseconds: 30 * index)),
-                    ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-          // Cart panel (right)
-          Container(
-            width: 340,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(left: BorderSide(color: AppColors.borderColor)),
-            ),
-            child: _CartPanel(
-              cart: cart,
-              soldBy: auth.currentUser?.username ?? 'Staff',
-              onCheckout: (sale) => setState(() => _lastSale = sale),
-            ),
-          ),
-        ],
+              // Cart panel (right) — fixed adaptive width
+              SizedBox(
+                width: cartWidth,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: AppColors.surface,
+                    border: Border(left: BorderSide(color: AppColors.borderColor)),
+                  ),
+                  child: _CartPanel(
+                    cart: cart,
+                    soldBy: auth.currentUser?.username ?? 'Staff',
+                    onCheckout: (sale) {},
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Future<void> _handleAddProduct(ProductModel p) async {
-    if (p.customFields.isEmpty) {
-      ref.read(cartProvider.notifier).addItem(p);
-      return;
-    }
-    // Show custom fields dialog
-    final details = await showDialog<Map<String, String>>(
+    final isFlex = p.category.toLowerCase().contains('flex') ||
+        p.name.toLowerCase().contains('flex');
+
+    // ── For Flex: we need to know available sqft stock ──────────────
+    // stockQuantity for flex stores total sqft (Length × Width added when stocking)
+    final availableSqft = p.stockQuantity;
+
+    final details = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (ctx) {
-        final Map<String, TextEditingController> ctrls = {
-          for (var f in p.customFields) f: TextEditingController()
-        };
-        return AlertDialog(
-          title: Text('Custom Details: ${p.name}'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: p.customFields.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextField(
-                  controller: ctrls[f],
-                  decoration: InputDecoration(labelText: f),
+        final fileNameCtrl = TextEditingController();
+        final widthCtrl = TextEditingController(text: '1');
+        final heightCtrl = TextEditingController(text: '1');
+        final qtyCtrl = TextEditingController(text: '1');
+        final rateCtrl = TextEditingController(text: p.sellingPrice.toStringAsFixed(0));
+        double sqrFt = 1.0;
+        double total = p.sellingPrice;
+
+        void updateCalc() {
+          final w = double.tryParse(widthCtrl.text) ?? 1;
+          final h = double.tryParse(heightCtrl.text) ?? 1;
+          final q = double.tryParse(qtyCtrl.text) ?? 1;
+          final r = double.tryParse(rateCtrl.text) ?? 0;
+          sqrFt = isFlex ? (w * h * q) : 1.0;
+          total = isFlex ? (w * h * q * r) : (q * r);
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            void onChanged(String _) => setState(() => updateCalc());
+            final bool overStock = isFlex &&
+                (double.tryParse(widthCtrl.text) ?? 1) *
+                    (double.tryParse(heightCtrl.text) ?? 1) *
+                    (double.tryParse(qtyCtrl.text) ?? 1) >
+                availableSqft;
+
+            return AlertDialog(
+              title: Row(
+                children: [
+                  const Text('🖨️ '),
+                  Expanded(
+                    child: Text(
+                      '${isFlex ? "Flex Order" : "Item"}: ${p.name}',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isFlex)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Text('📏 ', style: TextStyle(fontSize: 14)),
+                            Text(
+                              'Available Stock: ${availableSqft.toStringAsFixed(1)} sqft',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (isFlex) const SizedBox(height: 12),
+                    TextField(
+                      controller: fileNameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'File Name / Details (Optional)',
+                        prefixIcon: Icon(Icons.description_outlined, size: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (isFlex) ...[
+                      const Text('Dimensions', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: widthCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Width (ft)',
+                                prefixIcon: Icon(Icons.width_normal_outlined, size: 18),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: onChanged,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text('×',
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900,
+                                  color: AppColors.primary)),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: heightCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Height (ft)',
+                                prefixIcon: Icon(Icons.height_outlined, size: 18),
+                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: onChanged,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: qtyCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'QTY / Pieces',
+                              prefixIcon: Icon(Icons.tag, size: 18),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: onChanged,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: rateCtrl,
+                            decoration: InputDecoration(
+                              labelText: isFlex ? 'Rate / sqft' : 'Unit Price (PKR)',
+                              prefixIcon: const Icon(Icons.attach_money, size: 18),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: onChanged,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Summary box
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: overStock
+                            ? const Color(0xFFFFF3E0)
+                            : AppColors.primary.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: overStock ? AppColors.accentOrange : AppColors.primary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          if (isFlex)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Total Sqft', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                                Text(
+                                  sqrFt.toStringAsFixed(2),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    color: overStock ? AppColors.accentOrange : AppColors.textPrimary,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (isFlex) const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Total Amount', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                              Text(
+                                'PKR ${total.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (overStock)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning_amber_rounded, color: AppColors.accentOrange, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Exceeds available stock (${availableSqft.toStringAsFixed(0)} sqft)',
+                                    style: const TextStyle(color: AppColors.accentOrange, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              )).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final result = <String, String>{};
-                for (var f in p.customFields) {
-                  result[f] = ctrls[f]!.text;
-                }
-                Navigator.pop(ctx, result);
-              },
-              child: const Text('Add to Cart'),
-            ),
-          ],
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                ElevatedButton(
+                  onPressed: overStock ? null : () {
+                    final cd = <String, String>{};
+                    if (fileNameCtrl.text.isNotEmpty) cd['Details'] = fileNameCtrl.text;
+                    if (isFlex) {
+                      cd['Size'] = '${widthCtrl.text}x${heightCtrl.text} ft';
+                      final w = double.tryParse(widthCtrl.text) ?? 1;
+                      final h = double.tryParse(heightCtrl.text) ?? 1;
+                      cd['sqft_per_piece'] = (w * h).toString();
+                    }
+                    Navigator.pop(ctx, {
+                      'customDetails': cd,
+                      'rate': double.tryParse(rateCtrl.text) ?? 0,
+                      'qty': double.tryParse(qtyCtrl.text) ?? 1,
+                      'sqft_per_piece': isFlex ? ((double.tryParse(widthCtrl.text) ?? 1) * (double.tryParse(heightCtrl.text) ?? 1)) : 1.0,
+                    });
+                  },
+                  child: const Text('Add to Cart'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
 
     if (details != null) {
-      ref.read(cartProvider.notifier).addItem(p, customDetails: details);
+      final rate = details['rate'] as double;
+      final sqftPerPiece = details['sqft_per_piece'] as double;
+      final qty = details['qty'] as double;
+      final customDetails = details['customDetails'] as Map<String, String>;
+
+      // For flex: selling price = price per piece (sqft_per_piece × rate)
+      final productOverride = ProductModel(
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        unit: p.unit,
+        sellingPrice: isFlex ? (sqftPerPiece * rate) : rate,
+        costPrice: p.costPrice,
+        stockQuantity: p.stockQuantity,
+        lowStockThreshold: p.lowStockThreshold,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+        description: p.description,
+        sampleImages: p.sampleImages,
+        customFields: p.customFields,
+      );
+
+      // Cart quantity is simply the number of pieces (qty)
+      ref.read(cartProvider.notifier).addItem(
+        productOverride,
+        customDetails: customDetails,
+        quantity: qty,
+      );
+
+      // Check if remaining stock after adding will be ≤ 20 sqft (flex low-stock alert)
+      if (isFlex) {
+        final totalSqftAdded = sqftPerPiece * qty;
+        final remaining = p.stockQuantity - totalSqftAdded;
+        if (remaining <= 20 && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Text('⚠️ ', style: TextStyle(fontSize: 18)),
+                  Expanded(
+                    child: Text(
+                      'LOW FLEX STOCK: Only ${remaining.toStringAsFixed(1)} sqft remaining for "${p.name}"!',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.accentOrange,
+              duration: const Duration(seconds: 5),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
     }
   }
 }
-
 
 class _CategoryChip extends StatelessWidget {
   final String label;
@@ -256,11 +515,11 @@ class _ProductCardState extends State<_ProductCard> {
             color: _hovered ? AppColors.surfaceVariant : AppColors.cardColor,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: _hovered ? _catColor.withOpacity(0.5) : AppColors.borderColor,
+              color: _hovered ? _catColor.withValues(alpha: 0.5) : AppColors.borderColor,
               width: _hovered ? 1.5 : 1,
             ),
             boxShadow: _hovered
-                ? [BoxShadow(color: _catColor.withOpacity(0.15), blurRadius: 16, offset: const Offset(0, 6))]
+                ? [BoxShadow(color: _catColor.withValues(alpha: 0.15), blurRadius: 16, offset: const Offset(0, 6))]
                 : [],
           ),
           padding: const EdgeInsets.all(14),
@@ -272,7 +531,7 @@ class _ProductCardState extends State<_ProductCard> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _catColor.withOpacity(0.15),
+                      color: _catColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(_catEmoji, style: const TextStyle(fontSize: 16)),
@@ -337,6 +596,9 @@ class _CartPanel extends ConsumerStatefulWidget {
 class _CartPanelState extends ConsumerState<_CartPanel> {
   final _discountCtrl = TextEditingController(text: '0');
   final _paidCtrl = TextEditingController(text: '0');
+  final _customerNameCtrl = TextEditingController();
+  final _customerPhoneCtrl = TextEditingController();
+  DateTime? _estimatedDelivery;
 
   @override
   Widget build(BuildContext context) {
@@ -369,6 +631,91 @@ class _CartPanelState extends ConsumerState<_CartPanel> {
             ],
           ),
         ),
+        const Divider(height: 1, color: AppColors.borderColor),
+        
+        // Customer Details Form (Collapsible or small)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: AppColors.surface,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _customerNameCtrl,
+                      style: const TextStyle(fontSize: 12),
+                      decoration: const InputDecoration(
+                        labelText: 'Customer Name',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _customerPhoneCtrl,
+                      style: const TextStyle(fontSize: 12),
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Cell #',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now().add(const Duration(days: 1)),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (d != null) {
+                    if (!context.mounted) return;
+                    final t = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (t != null) {
+                      setState(() {
+                        _estimatedDelivery = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+                      });
+                    }
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.borderColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _estimatedDelivery == null 
+                            ? 'Set Delivery Date/Time' 
+                            : DateFormat('dd/MM/yy hh:mm a').format(_estimatedDelivery!),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textPrimary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
         const Divider(height: 1, color: AppColors.borderColor),
         // Items
         Expanded(
@@ -412,8 +759,8 @@ class _CartPanelState extends ConsumerState<_CartPanel> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text('Discount:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                  const SizedBox(width: 8),
+                  const Text('Discount:', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: SizedBox(
                       height: 36,
@@ -454,8 +801,8 @@ class _CartPanelState extends ConsumerState<_CartPanel> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text('Amount Paid:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                  const SizedBox(width: 8),
+                  const Text('Advance/Paid:', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: SizedBox(
                       height: 36,
@@ -473,9 +820,13 @@ class _CartPanelState extends ConsumerState<_CartPanel> {
                   ),
                 ],
               ),
-              if (cart.amountPaid > 0 && cart.change >= 0) ...[
+              if (cart.amountPaid > 0) ...[
                 const SizedBox(height: 8),
-                _TotalRow(label: 'Change', value: 'PKR ${fmt.format(cart.change)}', color: AppColors.accentGreen),
+                _TotalRow(
+                  label: cart.change >= 0 ? 'Change' : 'Balance Remaining',
+                  value: 'PKR ${fmt.format(cart.change >= 0 ? cart.change : cart.change.abs())}',
+                  color: cart.change >= 0 ? AppColors.accentGreen : AppColors.accentRed,
+                ),
               ],
               const SizedBox(height: 16),
               SizedBox(
@@ -508,11 +859,19 @@ class _CartPanelState extends ConsumerState<_CartPanel> {
 
 
   Future<void> _completeSale(BuildContext context) async {
-    final sale = await ref.read(cartProvider.notifier).checkout(soldBy: widget.soldBy);
+    final sale = await ref.read(cartProvider.notifier).checkout(
+      soldBy: widget.soldBy,
+      customerName: _customerNameCtrl.text,
+      customerPhone: _customerPhoneCtrl.text,
+      estimatedDelivery: _estimatedDelivery,
+    );
     if (sale != null) {
       ref.read(inventoryProvider.notifier).reload();
       _discountCtrl.text = '0';
       _paidCtrl.text = '0';
+      _customerNameCtrl.text = '';
+      _customerPhoneCtrl.text = '';
+      setState(() => _estimatedDelivery = null);
       widget.onCheckout(sale);
       if (context.mounted) {
         _showReceiptDialog(context, sale);
@@ -688,7 +1047,7 @@ class _ReceiptDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.accentGreen.withOpacity(0.15),
+                color: AppColors.accentGreen.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Text('🎉', style: TextStyle(fontSize: 48)),

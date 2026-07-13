@@ -28,8 +28,8 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
       createdAt: fields[8] as DateTime,
       updatedAt: fields[9] as DateTime,
       description: fields[10] as String,
-      sampleImages: (fields[11] as List?)?.cast<String>() ?? [],
-      customFields: (fields[12] as List?)?.cast<String>() ?? [],
+      sampleImages: (fields[11] as List).cast<String>(),
+      customFields: (fields[12] as List).cast<String>(),
     );
   }
 

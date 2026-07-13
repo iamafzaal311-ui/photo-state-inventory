@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/brand_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -101,8 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(48),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(40),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,16 +116,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             child: const Icon(Icons.print_rounded, size: 40, color: Colors.white),
                           ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-                          const SizedBox(height: 32),
-                          Text(
-                            'PrintPOS Pro',
-                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              fontSize: 40, fontWeight: FontWeight.w800,
-                              foreground: Paint()..shader = const LinearGradient(
-                                colors: [AppColors.primaryLight, AppColors.accent],
-                              ).createShader(const Rect.fromLTWH(0, 0, 300, 60)),
-                            ),
-                          ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2),
+                          const SizedBox(height: 28),
+                          const BrandLogo(fontSize: 40).animate().fadeIn(delay: 200.ms).slideX(begin: -0.2),
                           const SizedBox(height: 12),
                           Text(
                             'Professional Point of Sale\nfor Printing & Photostat Shops',
@@ -167,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ).animate().fadeIn(delay: 100.ms).slideY(begin: -0.2),
                           const SizedBox(height: 8),
                           Text(
-                            'Sign in to continue to PrintPOS Pro',
+                            'Sign in to continue to ShehrYar Flex Printer',
                             style: Theme.of(context).textTheme.bodyLarge,
                           ).animate().fadeIn(delay: 200.ms),
                           const SizedBox(height: 32),
@@ -200,15 +193,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.accentRed.withValues(alpha: 0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.accentRed.withValues(alpha: 0.3)),
+                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.error_outline, color: AppColors.accentRed, size: 18),
+                                  const Icon(Icons.error_outline, color: AppColors.primary, size: 18),
                                   const SizedBox(width: 8),
-                                  Text(auth.error!, style: const TextStyle(color: AppColors.accentRed)),
+                                  Text(auth.error!, style: const TextStyle(color: AppColors.primary)),
                                 ],
                               ),
                             ).animate().shake(),

@@ -72,6 +72,12 @@ class SaleModel extends HiveObject {
   @HiveField(11)
   late DateTime? estimatedDelivery;
 
+  @HiveField(12)
+  late String customerName;
+
+  @HiveField(13)
+  late String customerPhone;
+
   double get change => amountPaid - (totalAmount - discount);
   double get netAmount => totalAmount - discount;
 
@@ -88,5 +94,7 @@ class SaleModel extends HiveObject {
     this.orderNumber = '',
     this.orderStatus = 'Completed',
     this.estimatedDelivery,
+    this.customerName = '',
+    this.customerPhone = '',
   });
 }

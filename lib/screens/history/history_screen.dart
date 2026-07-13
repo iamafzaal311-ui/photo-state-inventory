@@ -45,20 +45,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             // Header
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sales History',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    Text(
-                      'Monthly analysis and reports',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sales History',
+                        style: Theme.of(context).textTheme.headlineLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Monthly analysis and reports',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 16),
                 // Month picker
                 Container(
                   decoration: BoxDecoration(
@@ -133,33 +137,33 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             // Summary cards
             Row(
               children: [
-                _SummaryCard(
+                Expanded(child: _SummaryCard(
                   label: 'Revenue',
                   value: 'PKR ${fmt.format(reportData.totalRevenue)}',
                   emoji: '💵',
                   color: AppColors.primary,
-                ),
-                const SizedBox(width: 16),
-                _SummaryCard(
-                  label: 'Cost',
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: _SummaryCard(
+                  label: 'Investment',
                   value: 'PKR ${fmt.format(reportData.totalCost)}',
                   emoji: '🛒',
                   color: AppColors.accentOrange,
-                ),
-                const SizedBox(width: 16),
-                _SummaryCard(
-                  label: 'Profit (Bachat)',
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: _SummaryCard(
+                  label: 'Profit',
                   value: 'PKR ${fmt.format(reportData.totalProfit)}',
                   emoji: '📈',
                   color: AppColors.accentGreen,
-                ),
-                const SizedBox(width: 16),
-                _SummaryCard(
-                  label: 'Transactions',
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: _SummaryCard(
+                  label: 'Sales',
                   value: '${reportData.totalTransactions}',
                   emoji: '📝',
                   color: AppColors.accent,
-                ),
+                )),
               ],
             ).animate().fadeIn(delay: 200.ms),
             const SizedBox(height: 24),
@@ -311,26 +315,26 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.cardColor,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderColor),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(emoji, style: const TextStyle(fontSize: 18)),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 14),
-            Column(
+            child: Text(emoji, style: const TextStyle(fontSize: 18)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -338,20 +342,21 @@ class _SummaryCard extends StatelessWidget {
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   label,
                   style: const TextStyle(
                     color: AppColors.textMuted,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -378,7 +383,7 @@ class _SaleRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isExpanded
-              ? AppColors.primary.withOpacity(0.4)
+              ? AppColors.primary.withValues(alpha: 0.4)
               : AppColors.borderColor,
         ),
       ),

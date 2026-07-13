@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/sale_model.dart';
+import '../models/product_model.dart';
 import 'inventory_service.dart';
 
 class SaleService {
@@ -18,6 +19,8 @@ class SaleService {
     String notes = '',
     String orderStatus = 'Completed',
     DateTime? estimatedDelivery,
+    String customerName = '',
+    String customerPhone = '',
   }) async {
     final total = items.fold(0.0, (sum, item) => sum + item.total);
     final now = DateTime.now();
@@ -38,12 +41,19 @@ class SaleService {
       orderNumber: orderNum,
       orderStatus: orderStatus,
       estimatedDelivery: estimatedDelivery,
+      customerName: customerName,
+      customerPhone: customerPhone,
     );
     await _box.put(sale.id, sale);
 
     // Deduct stock
     for (final item in items) {
-      await InventoryService.deductStock(item.productId, item.quantity);
+      double deductionQty = item.quantity;
+      if (item.customDetails.containsKey('sqft_per_piece')) {
+        final sqftPerPiece = double.tryParse(item.customDetails['sqft_per_piece']!) ?? 1.0;
+        deductionQty = item.quantity * sqftPerPiece;
+      }
+      await InventoryService.deductStock(item.productId, deductionQty);
     }
     return sale;
   }
@@ -80,6 +90,23 @@ class SaleService {
   static double getMonthRevenue(int year, int month) {
     return getSalesForMonth(year, month)
         .fold(0.0, (sum, s) => sum + s.netAmount);
+  }
+
+  static double getMonthInvestment(int year, int month, List<ProductModel> inventory) {
+    final sales = getSalesForMonth(year, month);
+    double investment = 0;
+    final costMap = {for (var p in inventory) p.id: p.costPrice};
+    for (final sale in sales) {
+      for (final item in sale.items) {
+        final cost = costMap[item.productId] ?? 0.0;
+        investment += cost * item.quantity;
+      }
+    }
+    return investment;
+  }
+
+  static double getMonthProfit(int year, int month, List<ProductModel> inventory) {
+    return getMonthRevenue(year, month) - getMonthInvestment(year, month, inventory);
   }
 
   static Map<String, double> getDailySalesForMonth(int year, int month) {

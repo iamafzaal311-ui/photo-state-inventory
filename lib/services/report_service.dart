@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -144,10 +145,10 @@ class ReportService {
         await file.writeAsBytes(pdfBytes);
         
         await box.put(lastReportKey, true);
-        print('Auto-generated monthly report at: ${file.path}');
+        debugPrint('Auto-generated monthly report at: ${file.path}');
       }
     } catch (e) {
-      print('Error auto-generating monthly report: $e');
+      debugPrint('Error auto-generating monthly report: $e');
     }
   }
 }

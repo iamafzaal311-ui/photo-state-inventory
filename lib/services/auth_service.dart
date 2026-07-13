@@ -6,7 +6,6 @@ import '../models/user_model.dart';
 
 class AuthService {
   static const String _boxName = 'users';
-  static const String _sessionKey = 'current_user_id';
   static const uuid = Uuid();
 
   static Box<UserModel> get _box => Hive.box<UserModel>(_boxName);

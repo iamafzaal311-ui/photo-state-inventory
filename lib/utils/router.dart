@@ -29,17 +29,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/login',
-        builder: (_, __) => const LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => MainShell(child: child),
         routes: [
-          GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
-          GoRoute(path: '/pos', builder: (_, __) => const PosScreen()),
-          GoRoute(path: '/inventory', builder: (_, __) => const InventoryScreen()),
-          GoRoute(path: '/inventory/add', builder: (_, __) => const InventoryScreen()),
-          GoRoute(path: '/history', builder: (_, __) => const HistoryScreen()),
-          GoRoute(path: '/users', builder: (_, __) => const UsersScreen()),
+          GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen()),
+          GoRoute(path: '/pos', builder: (context, state) => const PosScreen()),
+          GoRoute(path: '/inventory', builder: (context, state) => const InventoryScreen()),
+          GoRoute(path: '/inventory/add', builder: (context, state) => const InventoryScreen()),
+          GoRoute(path: '/history', builder: (context, state) => const HistoryScreen()),
+          GoRoute(path: '/users', builder: (context, state) => const UsersScreen()),
         ],
       ),
     ],

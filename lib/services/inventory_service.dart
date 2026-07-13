@@ -14,22 +14,25 @@ class InventoryService {
         ('B/W Copy', 'Copying', 1.5, 2.0, 1000.0, 'pages', 200.0, <String>[]),
         ('Color Copy', 'Copying', 5.0, 8.0, 500.0, 'pages', 100.0, <String>[]),
         ('Scanning', 'Scanning', 3.0, 5.0, 999.0, 'pages', 0.0, <String>[]),
-        ('Flex Printing', 'Printing', 10.0, 15.0, 1000.0, 'sq-ft', 100.0, ['Title/Subject', 'Name on Flex', 'Length (ft)', 'Width (ft)']),
-        ('Shirts Printing', 'Merch', 300.0, 500.0, 50.0, 'items', 10.0, ['Text/Name to Print', 'Size', 'Color']),
-        ('Mug Printing', 'Merch', 150.0, 250.0, 50.0, 'items', 10.0, ['Text to Print', 'Photo Theme']),
-        ('Photo Frames', 'Gifts', 100.0, 200.0, 30.0, 'items', 5.0, ['Frame Size', 'Orientation']),
-        ('Visiting Cards', 'Cards', 2.0, 3.0, 1000.0, 'items', 100.0, ['Company Name', 'Person Name', 'Contact Info']),
-        ('Wedding Cards', 'Cards', 10.0, 20.0, 500.0, 'items', 100.0, ['Bride & Groom Names', 'Event Date', 'Venue']),
-        ('PVC Card Copies', 'Printing', 30.0, 50.0, 100.0, 'items', 20.0, ['Employee/Student Name', 'ID/Designation']),
-        ('Photos', 'Printing', 10.0, 20.0, 500.0, 'items', 50.0, ['Size (e.g. Passport)', 'Background Color']),
-        ('Movies Making', 'Services', 1000.0, 2000.0, 99.0, 'jobs', 0.0, ['Event Type', 'Duration', 'Song Details']),
-        ('Tonner Filler', 'Services', 200.0, 400.0, 50.0, 'items', 5.0, ['Printer Model']),
-        ('Number Plates', 'Services', 300.0, 500.0, 20.0, 'items', 5.0, ['Vehicle Number', 'Style']),
-        ('Bike Lamination', 'Services', 200.0, 300.0, 20.0, 'jobs', 5.0, ['Bike Model', 'Lamination Type']),
-        ('Taping', 'Services', 50.0, 100.0, 50.0, 'jobs', 10.0, ['Details']),
+        
+        ('Flex Roll (3ft)', 'Flex', 10.0, 15.0, 450.0, 'sqft', 20.0, <String>[]),
+        ('Flex Roll (4ft)', 'Flex', 13.0, 20.0, 600.0, 'sqft', 20.0, <String>[]),
+        ('Flex Roll (5ft)', 'Flex', 15.0, 25.0, 750.0, 'sqft', 20.0, <String>[]),
+
+        ('Wedding Cards', 'Cards', 10.0, 20.0, 500.0, 'items', 100.0, <String>[]),
+        ('Visiting Cards', 'Cards', 2.0, 3.0, 1000.0, 'items', 100.0, <String>[]),
+        
+        ('Mug Printing', 'Merch', 150.0, 250.0, 50.0, 'items', 10.0, <String>[]),
+        ('Shirts Printing', 'Merch', 300.0, 500.0, 50.0, 'items', 10.0, <String>[]),
+        
+        ('Photo Frames', 'Gifts', 100.0, 200.0, 30.0, 'items', 5.0, <String>[]),
+        ('Photos (Passport)', 'Printing', 10.0, 20.0, 500.0, 'items', 50.0, <String>[]),
+        
+        ('Movies Making', 'Services', 1000.0, 2000.0, 99.0, 'jobs', 0.0, <String>[]),
+        ('Bike Lamination', 'Services', 200.0, 300.0, 20.0, 'jobs', 5.0, <String>[]),
+        ('Number Plates', 'Services', 300.0, 500.0, 20.0, 'items', 5.0, <String>[]),
+        
         ('Spiral Binding', 'Binding', 30.0, 50.0, 50.0, 'items', 10.0, <String>[]),
-        ('Hard Binding', 'Binding', 80.0, 150.0, 20.0, 'items', 5.0, <String>[]),
-        ('Lamination A4', 'Lamination', 10.0, 20.0, 100.0, 'items', 20.0, <String>[]),
         ('A4 Paper Ream', 'Paper', 400.0, 500.0, 20.0, 'reams', 5.0, <String>[]),
       ];
       for (final d in defaults) {

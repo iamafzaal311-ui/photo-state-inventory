@@ -45,7 +45,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Inventory',
+                      'Products',
                       style: Theme.of(context).textTheme.headlineLarge,
                     ),
                     Text(
@@ -348,37 +348,167 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     WidgetRef ref,
     ProductModel p,
   ) {
-    final ctrl = TextEditingController(
-      text: p.stockQuantity.toStringAsFixed(0),
-    );
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Update Stock: ${p.name}'),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: 'Quantity (${p.unit})',
-            prefixIcon: const Icon(Icons.inventory),
-          ),
+    final isFlex = p.category.toLowerCase().contains('flex') ||
+        p.name.toLowerCase().contains('flex');
+
+    if (isFlex) {
+      // For Flex: add stock via Length × Width (sqft)
+      final lengthCtrl = TextEditingController(text: '1');
+      final widthCtrl = TextEditingController(text: '1');
+      double addedSqft = 1.0;
+
+      showDialog(
+        context: context,
+        builder: (_) => StatefulBuilder(
+          builder: (context, setState) {
+            void update() {
+              final l = double.tryParse(lengthCtrl.text) ?? 0;
+              final w = double.tryParse(widthCtrl.text) ?? 0;
+              setState(() => addedSqft = l * w);
+            }
+
+            return AlertDialog(
+              title: Row(
+                children: [
+                  const Text('📏 '),
+                  Text('Add Flex Stock: ${p.name}'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Current Stock: ${p.stockQuantity.toStringAsFixed(1)} sqft',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('New Roll Dimensions', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: lengthCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Length (ft)',
+                            prefixIcon: Icon(Icons.height_outlined, size: 18),
+                          ),
+                          onChanged: (_) => update(),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('×', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: widthCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Width (ft)',
+                            prefixIcon: Icon(Icons.width_normal_outlined, size: 18),
+                          ),
+                          onChanged: (_) => update(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.accentGreen.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Adding:', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          '${addedSqft.toStringAsFixed(1)} sqft',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.accentGreen,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Text('→ New Total:', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          '${(p.stockQuantity + addedSqft).toStringAsFixed(1)} sqft',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final newTotal = p.stockQuantity + addedSqft;
+                    ref.read(inventoryProvider.notifier).updateStock(p.id, newTotal);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Add to Stock'),
+                ),
+              ],
+            );
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      );
+    } else {
+      // Non-flex: set quantity directly
+      final ctrl = TextEditingController(text: p.stockQuantity.toStringAsFixed(0));
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Update Stock: ${p.name}'),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'New Quantity (${p.unit})',
+              prefixIcon: const Icon(Icons.inventory),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final qty = double.tryParse(ctrl.text) ?? p.stockQuantity;
-              ref.read(inventoryProvider.notifier).updateStock(p.id, qty);
-              Navigator.pop(context);
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final qty = double.tryParse(ctrl.text) ?? p.stockQuantity;
+                ref.read(inventoryProvider.notifier).updateStock(p.id, qty);
+                Navigator.pop(context);
+              },
+              child: const Text('Update'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 
@@ -396,9 +526,9 @@ class _StockStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [

@@ -249,9 +249,9 @@ class _UserStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(children: [
         Text(value, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w800)),
@@ -312,7 +312,7 @@ class _UserRowState extends State<_UserRow> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.15),
+                    color: AppColors.primaryLight.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text('You', style: TextStyle(color: AppColors.primaryLight, fontSize: 10, fontWeight: FontWeight.w600)),
@@ -323,7 +323,7 @@ class _UserRowState extends State<_UserRow> {
               width: 70,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: (u.role == 'admin' ? AppColors.accentOrange : AppColors.accent).withOpacity(0.1),
+                color: (u.role == 'admin' ? AppColors.accentOrange : AppColors.accent).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(u.role == 'admin' ? 'Admin' : 'Staff',
@@ -340,7 +340,7 @@ class _UserRowState extends State<_UserRow> {
               width: 80,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: (u.isActive ? AppColors.accentGreen : AppColors.accentRed).withOpacity(0.1),
+                color: (u.isActive ? AppColors.accentGreen : AppColors.accentRed).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(u.isActive ? '● Active' : '● Inactive',
@@ -541,6 +541,7 @@ class _CreateUserDialogState extends State<_CreateUserDialog> {
     // Staff users are always created with role 'user'. Admins only via Register.
     await AuthService.createUser(username: username, password: _passwordCtrl.text, role: 'user');
     widget.onCreated();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 }

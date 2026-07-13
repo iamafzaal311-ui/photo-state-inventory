@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/app_theme.dart';
+import '../theme/app_theme.dart';
+import '../widgets/brand_logo.dart';
 
 class MainShell extends ConsumerWidget {
   final Widget child;
@@ -109,27 +110,8 @@ class _Sidebar extends ConsumerWidget {
                     style: TextStyle(fontSize: 20),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'PrintPOS',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(fontSize: 15),
-                    ),
-                    Text(
-                      'Pro',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.accent,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
+                 const SizedBox(width: 12),
+                const BrandLogo(fontSize: 18),
               ],
             ),
           ),

@@ -22,7 +22,7 @@ class SaleItemModelAdapter extends TypeAdapter<SaleItemModel> {
       quantity: fields[2] as double,
       unitPrice: fields[3] as double,
       unit: fields[4] as String,
-      customDetails: (fields[5] as Map?)?.cast<String, String>() ?? {},
+      customDetails: (fields[5] as Map).cast<String, String>(),
     );
   }
 
@@ -75,16 +75,18 @@ class SaleModelAdapter extends TypeAdapter<SaleModel> {
       soldBy: fields[6] as String,
       paymentMethod: fields[7] as String,
       notes: fields[8] as String,
-      orderNumber: fields[9] as String? ?? '',
-      orderStatus: fields[10] as String? ?? 'Completed',
+      orderNumber: fields[9] as String,
+      orderStatus: fields[10] as String,
       estimatedDelivery: fields[11] as DateTime?,
+      customerName: fields[12] as String,
+      customerPhone: fields[13] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, SaleModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -108,7 +110,11 @@ class SaleModelAdapter extends TypeAdapter<SaleModel> {
       ..writeByte(10)
       ..write(obj.orderStatus)
       ..writeByte(11)
-      ..write(obj.estimatedDelivery);
+      ..write(obj.estimatedDelivery)
+      ..writeByte(12)
+      ..write(obj.customerName)
+      ..writeByte(13)
+      ..write(obj.customerPhone);
   }
 
   @override

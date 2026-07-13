@@ -112,6 +112,8 @@ class CartNotifier extends Notifier<CartState> {
     required String soldBy, 
     String orderStatus = 'Completed',
     DateTime? estimatedDelivery,
+    String customerName = '',
+    String customerPhone = '',
   }) async {
     if (state.items.isEmpty) return null;
     final saleItems = state.items
@@ -133,6 +135,8 @@ class CartNotifier extends Notifier<CartState> {
       paymentMethod: state.paymentMethod,
       orderStatus: orderStatus,
       estimatedDelivery: estimatedDelivery,
+      customerName: customerName,
+      customerPhone: customerPhone,
     );
     clear();
     return sale;
