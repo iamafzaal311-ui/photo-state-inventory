@@ -23,7 +23,6 @@ jobs:
       uses: subosito/flutter-action@v2.16.0
       with:
         channel: 'stable'
-        flutter-version: '3.24.0' # Yeh up-to-date version aapki dependency requirement ko perfectly match karega
 
     - name: Install Dependencies
       run: flutter pub get
