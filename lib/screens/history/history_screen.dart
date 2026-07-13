@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../models/sale_model.dart';
@@ -120,13 +121,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   label: 'Open Reports',
                   gradient: AppColors.greenGradient,
                   onTap: () async {
+                    if (kIsWeb) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Not supported on Web.')),
+                      );
+                      return;
+                    }
                     final directory = await getApplicationDocumentsDirectory();
                     final reportsPath = '${directory.path}/InventoryManData/Reports';
                     final dir = Directory(reportsPath);
                     if (!await dir.exists()) {
                       await dir.create(recursive: true);
                     }
-                    if (Platform.isWindows) {
+                    if (!kIsWeb && Platform.isWindows) {
                       await Process.run('explorer.exe', [reportsPath.replaceAll('/', '\\')]);
                     }
                   },
