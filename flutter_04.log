@@ -1,0 +1,71 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter analyze
+
+## exception
+
+_Exception: Exception: analysis server exited with code -1073740791 and output:
+[stdout] {"event":"server.connected","params":{"version":"1.40.0","pid":21140}}
+[stdout] {"id":"1"}
+[stdout] {"event":"analysis.errors","params":{"file":"F:\\inventory management systemm\\inventory_man\\analysis_options.yaml","errors":[]}}
+[stdout] {"event":"analysis.errors","params":{"file":"F:\\inventory management systemm\\inventory_man\\pubspec.yaml","errors":[]}}
+[stdout] {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
+[stderr] ../../runtime/vm/zone.cc: 96: error: Out of memory.
+[stderr] version=3.10.4 (stable) (Tue Dec 9 00:01:55 2025 -0800) on "windows_x64"
+[stderr] pid=21140, thread=23164, isolate_group=main(0000015B42DD31D0), isolate=(nil)(0000000000000000)
+[stderr] os=windows, arch=x64, comp=no, sim=no
+[stderr] isolate_instructions=15b414d0000, vm_instructions=7ff6da8b8080
+[stderr] fp=d0f0fd180, sp=d0f0fd138, pc=7ff6dab9dc73
+[stderr]   pc 0x00007ff6dab9dc73 fp 0x0000000d0f0fd180 Dart_DetectNullSafety+0x2dd563
+[stderr] -- End of DumpStackTrace
+[stderr] ../../runtime/vm/zone.cc: 96: error: Out of memory.
+[stderr] Aborting reentrant request for stack trace.
+
+```
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, 3.38.5, on Microsoft Windows [Version 10.0.19045.6466], locale en-US) [263ms]
+    • Flutter version 3.38.5 on channel stable at E:\flutter_windows_3.38.5-stable\flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision f6ff1529fd (7 months ago), 2025-12-11 11:50:07 -0500
+    • Engine revision 1527ae0ec5
+    • Dart version 3.10.4
+    • DevTools version 2.51.1
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, omit-legacy-version-file, enable-lldb-debugging
+
+[!] Windows Version (Problem detected with Windows installation) [585ms]
+    ! Get-Process failed to complete
+
+[!] Android toolchain - develop for Android devices (Android SDK version 36.1.0) [9.3s]
+    • Android SDK at C:\Users\Sunny\AppData\Local\Android\sdk
+    • Emulator version 36.3.10.0 (build_id 14472402) (CL:N/A)
+    • Platform android-36, build-tools 36.1.0
+    • Java binary at: C:\Program Files\Android\Android Studio\jbr\bin\java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    ✗ Could not determine java version
+    • All Android licenses accepted.
+
+[✗] Chrome - develop for the web (Cannot find Chrome executable at .\Google\Chrome\Application\chrome.exe) [6ms]
+    ! Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.
+
+[✗] Visual Studio - develop Windows apps [5ms]
+    ✗ Visual Studio not installed; this is necessary to develop Windows apps.
+      Download at https://visualstudio.microsoft.com/downloads/.
+      Please install the "Desktop development with C++" workload, including all of its default components
+
+[✓] Connected device (2 available) [149ms]
+    • Windows (desktop) • windows • windows-x64    • Microsoft Windows [Version 10.0.19045.6466]
+    • Edge (web)        • edge    • web-javascript • Microsoft Edge 150.0.4078.65
+
+[✓] Network resources [2.6s]
+    • All expected network resources are available.
+
+! Doctor found issues in 4 categories.
+```
